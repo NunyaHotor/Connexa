@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package connexa;
+option go_package = "github.com/NunyaHotor/Connexa/proto;proto";
 
 // -----------------------------
 // Core Envelope
