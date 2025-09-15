@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package connexa;
+
+// -----------------------------
+// Core Envelope
+// -----------------------------
+message MessageEnvelope {
+  string id = 1;             // Unique message ID (UUID)
+  string sender_id = 2;      // Encrypted sender identity (sealed sender)
+  string recipient_id = 3;   // Recipient (user, group, or device)
+  int64 timestamp = 4;       // Unix time (ms)
+  bytes ciphertext = 5;      // Encrypted MessagePayload
+  MessageType type = 6;      // Message type
+}
+
+// Supported top-level message types
+enum MessageType {
+  TEXT = 0;
+  MEDIA = 1;
+  CALL = 2;
+  CONTROL = 3;  // e.g., group/device management
+}
+
+// -----------------------------
+// Payload (decrypted content)
+// -----------------------------
+message MessagePayload {
+  string sender_device = 1; // Device ID of sender
+  oneof content {
+    TextMessage text = 2;
+    MediaMessage media = 3;
+    CallMessage call = 4;
+    ControlMessage control = 5;
+  }
+}
+
+// -----------------------------
+// Text
+// -----------------------------
+message TextMessage {
+  string body = 1;
+}
+
+// -----------------------------
+// Media
+// -----------------------------
+message MediaMessage {
+  string file_name = 1;
+  string mime_type = 2;
+  int64 file_size = 3;
+  bytes media_key = 4;   // Symmetric key for decryption
+  string media_url = 5;  // Location (encrypted blob in S3/IPFS/etc.)
+  Thumbnail thumbnail = 6;
+}
+
+message Thumbnail {
+  bytes data = 1;   // Small preview image (encrypted)
+  int32 width = 2;
+  int32 height = 3;
+}
+
+// -----------------------------
+// Calls (WebRTC signaling)
+// -----------------------------
+message CallMessage {
+  string call_id = 1;
+  CallType call_type = 2;
+  string sdp = 3;        // Session description (offer/answer)
+  repeated string candidates = 4; // ICE candidates
+}
+
+enum CallType {
+  VOICE = 0;
+  VIDEO = 1;
+  GROUP = 2;
+}
+
+// -----------------------------
+// Control Messages
+// -----------------------------
+message ControlMessage {
+  oneof action {
+    GroupControl group = 1;
+    DeviceControl device = 2;
+  }
+}
+
+// Group management (create, invite, remove, leave)
+message GroupControl {
+  string group_id = 1;
+  GroupAction action = 2;
+  repeated string members = 3; // Affected members
+}
+
+enum GroupAction {
+  CREATE = 0;
+  INVITE = 1;
+  REMOVE = 2;
+  LEAVE = 3;
+  UPDATE = 4; // e.g., name, avatar
+}
+
+// Device linking (multi-device support)
+message DeviceControl {
+  string device_id = 1;
+  DeviceAction action = 2;
+}
+
+enum DeviceAction {
+  LINK = 0;
+  UNLINK = 1;
+  SYNC = 2;  // Sync keys/messages
+}
