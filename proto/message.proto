@@ -113,3 +113,12 @@ enum DeviceAction {
   UNLINK = 1;
   SYNC = 2;  // Sync keys/messages
 }
+
+// -----------------------------
+// Encrypted Message
+// -----------------------------
+message EncryptedMessage {
+  bytes ciphertext = 1;
+  bytes sender_blind = 2; // For sealed sender
+  int64 timestamp = 3;
+}
