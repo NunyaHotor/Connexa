@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use thiserror::Error;
+use chrono::Utc;
 
 /// Custom error type for relay operations.
 #[derive(Debug, Error)]
@@ -56,6 +57,16 @@ impl MessageStore {
         let mut store = self.store.lock().await;
         Ok(store.remove(recipient_id).unwrap_or_default())
     }
+
+    pub async fn cleanup_expired(&self) {
+        let now = Utc::now().timestamp();
+        let mut store = self.store.lock().await;
+        for messages in store.values_mut() {
+            messages.retain(|msg| {
+                msg.ttl == 0 || msg.timestamp + msg.ttl > now
+            });
+        }
+    }
 }
 
 /// Example push notification trigger (stub, async).
@@ -77,3 +88,25 @@ pub async fn store_message_for_recipient(
     }
     Ok(())
 }
+
+/// Pseudocode for client message display
+pub fn display_messages(messages: Vec<EncryptedMessage>) {
+    let now = chrono::Utc::now().timestamp();
+    for msg in messages {
+        if msg.ttl == 0 || msg.timestamp + msg.ttl > now {
+            // display(msg);
+        } else {
+            // Optionally, delete from local storage
+        }
+    }
+}
+
+// Pseudocode (e.g., using rusqlite or sqlx)
+// conn.execute(
+// "INSERT INTO messages_fts (content, sender, timestamp) VALUES (?, ?, ?)",
+// &[&decrypted_content, &sender, &timestamp],
+// )?;
+let mut stmt = conn.prepare("SELECT content, sender, timestamp FROM messages_fts WHERE messages_fts MATCH ?")?;
+let rows = stmt.query_map([search_query], |row| {
+    // map to your struct
+})?;

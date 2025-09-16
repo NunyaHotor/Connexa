@@ -16,23 +16,29 @@ pub struct AppState {
 
 pub async fn post_message(
     State(state): State<AppState>,
-    AuthenticatedUser { user_id }: AuthenticatedUser,
-    Json(payload): Json<EncryptedMessage>,
+    AuthenticatedUser { user_id, device_id }: AuthenticatedUser,
+    Json(payload): Json<SendMessagePayload>,
 ) -> Result<(), String> {
-    let authenticated = true;
-    store_message_for_recipient(&state.store, &user_id, payload, authenticated)
-        .await
-        .map_err(|e| e.to_string())
+    // Lookup all recipient devices
+    let recipient_devices = state.device_store.get_devices_for_user(&payload.recipient_user_id).await;
+    send_message_to_all_devices(
+        &state.session, // sender's session
+        &recipient_devices,
+        &payload.plaintext,
+        &[], // AAD
+        &state.message_store,
+    ).await;
+    Ok(())
 }
 
+#[get("/messages")]
 pub async fn get_messages(
     State(state): State<AppState>,
-    AuthenticatedUser { user_id }: AuthenticatedUser,
+    AuthenticatedUser { device_id, .. }: AuthenticatedUser,
 ) -> Result<Json<Vec<EncryptedMessage>>, String> {
-    let authenticated = true;
     let msgs = state
-        .store
-        .fetch_messages(&user_id, authenticated)
+        .message_store
+        .fetch_messages(&device_id.to_string(), true)
         .await
         .map_err(|e| e.to_string())?;
     Ok(Json(msgs))

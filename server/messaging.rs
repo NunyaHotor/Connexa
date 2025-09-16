@@ -1,5 +1,7 @@
 use crate::crypto::session::SecureSession;
 use crate::proto::message::EncryptedMessage;
+use crate::server::device::Device;
+use crate::server::relay::MessageStore;
 use sha2::{Sha256, Digest};
 use crate::crypto::key::PublicKey;
 
@@ -31,5 +33,28 @@ impl Messenger {
             }
         }
         self.session.decrypt_message(&msg.ciphertext, aad)
+    }
+}
+
+pub async fn send_message_to_all_devices(
+    sender_session: &SecureSession,
+    recipient_devices: &[Device],
+    plaintext: &[u8],
+    aad: &[u8],
+    store: &MessageStore,
+) {
+    for device in recipient_devices {
+        // Assume you have a way to get or create a session for each device
+        let mut session = get_or_create_session_for_device(device).await;
+        let ciphertext = session.encrypt_message(plaintext, aad);
+        let msg = EncryptedMessage {
+            ciphertext: ciphertext.into(),
+            sender_blind: vec![], // sealed sender logic
+            dh_ratchet_pub: session.ratchet.dhs_private.public_key().as_bytes().to_vec(),
+            message_number: session.ratchet.message_number,
+            timestamp: chrono::Utc::now().timestamp(),
+            target_device_id: Some(device.id), // Add this field to your proto
+        };
+        store.store_message(&device.id.to_string(), msg).await;
     }
 }

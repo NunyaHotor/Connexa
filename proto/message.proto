@@ -119,6 +119,10 @@ enum DeviceAction {
 // -----------------------------
 message EncryptedMessage {
   bytes ciphertext = 1;
-  bytes sender_blind = 2; // For sealed sender
-  int64 timestamp = 3;
+  bytes sender_blind = 2;
+  bytes dh_ratchet_pub = 3;
+  uint32 message_number = 4;
+  int64 timestamp = 5;
+  string target_device_id = 6;
+  int64 ttl = 7; // NEW: time-to-live in seconds (optional)
 }
