@@ -2,6 +2,7 @@
 
 use rand_core::OsRng;
 use x25519_dalek::{EphemeralSecret, PublicKey, StaticSecret};
+use sha2::Digest;
 
 /// Represents a user's long-term identity key pair.
 pub struct IdentityKeyPair {
@@ -23,7 +24,7 @@ pub struct OneTimePreKeyPair {
 
 /// Generates a new X25519 key pair.
 pub fn generate_keypair() -> (StaticSecret, PublicKey) {
-    let private = StaticSecret::new(&mut OsRng);
+    let private = StaticSecret::random_from_rng(&mut OsRng);
     let public = PublicKey::from(&private);
     (private, public)
 }
@@ -38,14 +39,14 @@ pub fn x3dh_agree(
     bob_onetime_prekey_pub: Option<&PublicKey>,
 ) -> [u8; 32] {
     // DH1: Alice's ephemeral key & Bob's signed prekey
-    let dh1 = alice_ephemeral_priv.diffie_hellman(bob_signed_prekey_pub);
+    let dh1 = (&alice_ephemeral_priv).diffie_hellman(bob_signed_prekey_pub);
     // DH2: Alice's identity key & Bob's signed prekey
     let dh2 = alice_identity_priv.diffie_hellman(bob_signed_prekey_pub);
     // DH3: Alice's ephemeral key & Bob's identity key
-    let dh3 = alice_ephemeral_priv.diffie_hellman(bob_identity_pub);
+    let dh3 = (&alice_ephemeral_priv).diffie_hellman(bob_identity_pub);
     // DH4: Alice's ephemeral key & Bob's one-time prekey (if present)
     let dh4 = if let Some(otk) = bob_onetime_prekey_pub {
-        alice_ephemeral_priv.diffie_hellman(otk).to_bytes()
+        (&alice_ephemeral_priv).diffie_hellman(otk).to_bytes()
     } else {
         [0u8; 32]
     };

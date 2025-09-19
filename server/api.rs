@@ -1,44 +1,52 @@
 use axum::{
     extract::{Path, State, Json},
-    routing::{post, get},
+    routing::{get},
     Router,
+    response::IntoResponse,
 };
-use crate::server::relay::{MessageStore, store_message_for_recipient, RelayError};
-use crate::proto::message::EncryptedMessage;
+use crate::relay::{MessageStore};
+use crate::connexa::EncryptedMessage;
 use std::sync::Arc;
-use crate::server::auth::AuthenticatedUser;
-use axum::extract::RequestParts;
+use crate::auth::AuthenticatedUser;
+
+use serde::Deserialize;
 
 #[derive(Clone)]
 pub struct AppState {
     pub store: Arc<MessageStore>,
 }
 
+#[derive(Deserialize)]
+pub struct SendMessagePayload {
+    pub recipient_user_id: String,
+    pub plaintext: Vec<u8>,
+}
+
+/*
 pub async fn post_message(
     State(state): State<AppState>,
-    AuthenticatedUser { user_id, device_id }: AuthenticatedUser,
+    AuthenticatedUser { user_id }: AuthenticatedUser,
     Json(payload): Json<SendMessagePayload>,
 ) -> Result<(), String> {
     // Lookup all recipient devices
-    let recipient_devices = state.device_store.get_devices_for_user(&payload.recipient_user_id).await;
-    send_message_to_all_devices(
-        &state.session, // sender's session
-        &recipient_devices,
-        &payload.plaintext,
-        &[], // AAD
-        &state.message_store,
-    ).await;
+    //let recipient_devices = state.device_store.get_devices_for_user(&payload.recipient_user_id).await;
+    //send_message_to_all_devices(
+    //    &state.session, // sender's session
+    //    &recipient_devices,
+    //    &payload.plaintext,
+    //    &[], // AAD
+    //).await;
     Ok(())
 }
+*/
 
-#[get("/messages")]
 pub async fn get_messages(
     State(state): State<AppState>,
-    AuthenticatedUser { device_id, .. }: AuthenticatedUser,
+    AuthenticatedUser { user_id }: AuthenticatedUser,
 ) -> Result<Json<Vec<EncryptedMessage>>, String> {
     let msgs = state
-        .message_store
-        .fetch_messages(&device_id.to_string(), true)
+        .store
+        .fetch_messages(&user_id.to_string(), true)
         .await
         .map_err(|e| e.to_string())?;
     Ok(Json(msgs))
@@ -46,7 +54,7 @@ pub async fn get_messages(
 
 pub fn app(store: Arc<MessageStore>) -> Router {
     Router::new()
-        .route("/message", post(post_message))
+        //.route("/message", post(post_message))
         .route("/messages/:recipient_id", get(get_messages))
         .with_state(AppState { store })
 }

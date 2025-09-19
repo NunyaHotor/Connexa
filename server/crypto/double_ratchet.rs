@@ -36,7 +36,7 @@ impl RatchetState {
 
     /// Perform a DH ratchet step (when a new public key is received).
     pub fn ratchet(&mut self, new_dhr_public: PublicKey) {
-        let dh_output = self.dhs_private.diffie_hellman(&new_dhr_public);
+        let dh_output = (&self.dhs_private).diffie_hellman(&new_dhr_public);
         let hk = Hkdf::<Sha256>::new(Some(&self.root_key), dh_output.as_bytes());
         let mut new_root = [0u8; 32];
         let mut new_chain = [0u8; 32];

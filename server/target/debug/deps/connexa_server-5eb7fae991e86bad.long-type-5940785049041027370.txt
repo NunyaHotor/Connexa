@@ -1,0 +1,2 @@
+fn(State<GroupMlsState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<GroupMessagePayload>) -> impl std::future::Future<Output = impl IntoResponse> {send_group_message}
+fn(State<GroupMlsState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<GroupMessagePayload>) -> impl std::future::Future<Output = impl IntoResponse> {send_group_message}: Handler<_, _, _>

@@ -1,0 +1,2 @@
+fn(State<GroupState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<InvitePayload>) -> impl std::future::Future<Output = impl IntoResponse> {remove_from_group}
+fn(State<GroupState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<InvitePayload>) -> impl std::future::Future<Output = impl IntoResponse> {remove_from_group}: Handler<_, _, _>

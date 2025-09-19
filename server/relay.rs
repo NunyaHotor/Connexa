@@ -1,4 +1,4 @@
-use crate::proto::message::EncryptedMessage;
+use crate::connexa::EncryptedMessage;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -101,12 +101,3 @@ pub fn display_messages(messages: Vec<EncryptedMessage>) {
     }
 }
 
-// Pseudocode (e.g., using rusqlite or sqlx)
-// conn.execute(
-// "INSERT INTO messages_fts (content, sender, timestamp) VALUES (?, ?, ?)",
-// &[&decrypted_content, &sender, &timestamp],
-// )?;
-let mut stmt = conn.prepare("SELECT content, sender, timestamp FROM messages_fts WHERE messages_fts MATCH ?")?;
-let rows = stmt.query_map([search_query], |row| {
-    // map to your struct
-})?;

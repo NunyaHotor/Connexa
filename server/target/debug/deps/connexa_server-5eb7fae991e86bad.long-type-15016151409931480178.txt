@@ -1,0 +1,2 @@
+fn(State<GroupState>, AuthenticatedUser, axum::Json<CreateGroupPayload>) -> impl std::future::Future<Output = axum::Json<Group>> {create_group}
+fn(State<GroupState>, AuthenticatedUser, axum::Json<CreateGroupPayload>) -> impl std::future::Future<Output = axum::Json<Group>> {create_group}: Handler<_, _, _>

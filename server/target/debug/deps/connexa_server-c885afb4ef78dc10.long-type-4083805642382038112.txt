@@ -1,0 +1,2 @@
+fn(axum::Json<IceCandidateJson>) -> impl std::future::Future<Output = Result<(), webrtc::Error>> {handle_ice_candidate_route}
+fn(axum::Json<IceCandidateJson>) -> impl std::future::Future<Output = Result<(), webrtc::Error>> {handle_ice_candidate_route}: Handler<_, _, _>

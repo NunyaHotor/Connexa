@@ -1,0 +1,2 @@
+fn(State<GroupState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<InvitePayload>) -> impl std::future::Future<Output = Result<axum::Json<Group>, std::string::String>> {invite_to_group}
+fn(State<GroupState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<InvitePayload>) -> impl std::future::Future<Output = Result<axum::Json<Group>, std::string::String>> {invite_to_group}: Handler<_, _, _>

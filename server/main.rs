@@ -1,15 +1,37 @@
 use axum::Server;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use crate::server::relay::MessageStore;
-use crate::server::api::app;
-use crate::server::group_api::group_router;
-use crate::server::group_message_api::group_message_router;
-use crate::server::group_mls::GroupSession;
-use crate::server::device_api::device_router;
-use crate::server::device::Device;
+use crate::relay::MessageStore;
+use crate::api::app;
+use crate::group_api::group_router;
+use crate::group_message_api::group_message_router;
+use crate::group_mls::GroupSession;
+use crate::device_api::device_router;
+use crate::device::Device;
+use crate::sfu_api::sfu_router;
+use crate::webrtc::webrtc_router;
 use parking_lot::Mutex;
 use tokio::time::{interval, Duration};
+
+use sqlx::SqlitePool;
+
+mod api;
+mod auth;
+mod device;
+mod device_api;
+mod group;
+mod group_api;
+mod group_message_api;
+mod group_mls;
+mod messaging;
+mod relay;
+mod sfu_api;
+mod crypto;
+mod webrtc;
+pub mod connexa {
+    tonic::include_proto!("connexa");
+}
+
 
 #[tokio::main]
 async fn main() {
@@ -17,11 +39,14 @@ async fn main() {
     let group_state = Arc::new(Mutex::new(Vec::new()));
     let group_sessions = Arc::new(Mutex::new(Vec::<GroupSession>::new()));
     let devices = Arc::new(Mutex::new(Vec::<Device>::new()));
+    let pool = SqlitePool::connect("sqlite:connexa.db").await.unwrap();
 
     let app = app(store.clone())
         .merge(group_router(group_state))
         .merge(group_message_router(group_sessions))
-        .merge(device_router(devices));
+        .merge(device_router(devices, pool))
+        .merge(sfu_router())
+        .merge(webrtc_router());
 
     // Spawn background cleanup task
     let store_clone = store.clone();

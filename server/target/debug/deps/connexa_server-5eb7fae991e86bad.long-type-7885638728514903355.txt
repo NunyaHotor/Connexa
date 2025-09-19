@@ -1,0 +1,2 @@
+fn(State<GroupState>, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = std::option::Option<axum::Json<Group>>> {get_group}
+fn(State<GroupState>, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = std::option::Option<axum::Json<Group>>> {get_group}: Handler<_, _, _>

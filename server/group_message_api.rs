@@ -1,14 +1,11 @@
-use axum::{
-    extract::{State, Json, Path},
-    routing::post,
-    Router,
-};
+use axum::{extract::{State, Json, Path}, routing::post, Router, response::IntoResponse};
 use uuid::Uuid;
 use serde::Deserialize;
-use crate::server::auth::AuthenticatedUser;
-use crate::server::group_mls::GroupSession;
+use crate::auth::AuthenticatedUser;
+use crate::group_mls::GroupSession;
 use std::sync::Arc;
 use parking_lot::Mutex;
+use openmls::prelude::HpkeCiphertext;
 
 #[derive(Clone)]
 pub struct GroupMlsState {
@@ -21,45 +18,42 @@ pub struct GroupMessagePayload {
     pub plaintext: Vec<u8>,
 }
 
-#[post("/group/:group_id/message")]
 pub async fn send_group_message(
     State(state): State<GroupMlsState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Path(group_id): Path<Uuid>,
     Json(payload): Json<GroupMessagePayload>,
-) -> Result<Json<Vec<u8>>, String> {
+) -> impl IntoResponse {
     let backend = openmls_rust_crypto::OpenMlsRustCrypto::default();
     let mut sessions = state.sessions.lock();
     if let Some(session) = sessions.iter_mut().find(|s| s.group_id == group_id) {
         // TODO: Check user is a group member
         let ciphertext = session
             .encrypt_message(&backend, &payload.plaintext)
-            .map_err(|e| format!("MLS error: {e}"))?;
-        Ok(Json(ciphertext.into_bytes()))
+            .map_err(|e| format!("MLS error: {e}"));
+        return Ok(Json(ciphertext.unwrap().to_vec()))
     } else {
-        Err("Group session not found".into())
+        return Err("Group session not found".to_string())
     }
 }
 
-#[post("/group/:group_id/receive")]
 pub async fn receive_group_message(
     State(state): State<GroupMlsState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Path(group_id): Path<Uuid>,
     Json(ciphertext): Json<Vec<u8>>,
-) -> Result<Json<Vec<u8>>, String> {
+) -> impl IntoResponse {
     let backend = openmls_rust_crypto::OpenMlsRustCrypto::default();
     let mut sessions = state.sessions.lock();
     if let Some(session) = sessions.iter_mut().find(|s| s.group_id == group_id) {
         // TODO: Check user is a group member
-        let mls_ciphertext = openmls::prelude::MlsCiphertext::from_bytes(&ciphertext)
-            .map_err(|e| format!("MLS decode error: {e}"))?;
+        let mls_ciphertext = HpkeCiphertext::from_slice(&ciphertext);
         let plaintext = session
-            .decrypt_message(&backend, &mls_ciphertext)
-            .map_err(|e| format!("MLS error: {e}"))?;
-        Ok(Json(plaintext))
+            .decrypt_message(&backend, &mls_ciphertext.unwrap())
+            .map_err(|e| format!("MLS error: {e}"));
+        return Ok(Json(plaintext.unwrap()))
     } else {
-        Err("Group session not found".into())
+        return Err("Group session not found".to_string())
     }
 }
 

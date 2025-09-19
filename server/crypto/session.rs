@@ -4,7 +4,7 @@ use crate::crypto::x3dh;
 use crate::crypto::double_ratchet::{RatchetState};
 use x25519_dalek::{EphemeralSecret, PublicKey, StaticSecret};
 use chacha20poly1305::{
-    aead::{Aead, KeyInit, OsRng as ChaChaOsRng},
+    aead::{Aead, KeyInit, OsRng as ChaChaOsRng, AeadCore},
     ChaCha20Poly1305, Key, Nonce,
 };
 
@@ -22,7 +22,7 @@ impl SecureSession {
         bob_onetime_prekey_pub: Option<&PublicKey>,
     ) -> Self {
         // Generate Alice's ephemeral key
-        let alice_ephemeral = EphemeralSecret::new(rand_core::OsRng);
+        let alice_ephemeral = EphemeralSecret::random_from_rng(rand_core::OsRng);
         // Compute shared secret using X3DH
         let shared_secret = x3dh::x3dh_agree(
             alice_identity_priv,
@@ -112,7 +112,7 @@ mod tests {
         assert_eq!(session.ratchet.root_key.len(), 32);
 
         // Bob computes shared secret using X3DH (simulate)
-        let alice_ephemeral = EphemeralSecret::new(rand_core::OsRng);
+        let alice_ephemeral = EphemeralSecret::random_from_rng(rand_core::OsRng);
         let shared_secret = crate::crypto::x3dh::x3dh_agree(
             &alice_id_priv,
             &alice_ephemeral,
@@ -122,7 +122,7 @@ mod tests {
         );
         let bob_session = SecureSession::initiate_as_bob(
             shared_secret,
-            EphemeralSecret::new(rand_core::OsRng),
+            EphemeralSecret::random_from_rng(rand_core::OsRng),
             PublicKey::from(&alice_ephemeral),
         );
         assert_eq!(bob_session.ratchet.root_key.len(), 32);

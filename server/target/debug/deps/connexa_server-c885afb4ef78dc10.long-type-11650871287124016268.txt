@@ -1,0 +1,2 @@
+fn(axum::extract::State<GroupState>, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = impl IntoResponse> {get_group}
+fn(axum::extract::State<GroupState>, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = impl IntoResponse> {get_group}: Handler<_, _, _>

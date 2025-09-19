@@ -1,9 +1,9 @@
 use crate::crypto::session::SecureSession;
-use crate::proto::message::EncryptedMessage;
-use crate::server::device::Device;
-use crate::server::relay::MessageStore;
+use crate::connexa::EncryptedMessage;
+use crate::device::Device;
+use crate::relay::MessageStore;
 use sha2::{Sha256, Digest};
-use crate::crypto::key::PublicKey;
+use x25519_dalek::PublicKey;
 
 pub struct Messenger {
     pub session: SecureSession,
@@ -22,13 +22,15 @@ impl Messenger {
             dh_ratchet_pub: sender_pub.to_vec(),
             message_number: self.session.ratchet.message_number,
             timestamp: chrono::Utc::now().timestamp(),
+            target_device_id: "".to_string(),
+            ttl: 0,
         }
     }
 
     pub fn receive_message(&mut self, msg: &EncryptedMessage, aad: &[u8]) -> Option<Vec<u8>> {
         // If the sender's DH ratchet pubkey is new, perform a ratchet step
         if msg.dh_ratchet_pub != self.session.ratchet.dhr_public.as_bytes() {
-            if let Ok(new_pub) = PublicKey::from_slice(&msg.dh_ratchet_pub) {
+                        if let Ok(new_pub) = PublicKey::from_slice(&msg.dh_ratchet_pub) {
                 self.session.ratchet.ratchet(new_pub);
             }
         }
@@ -36,6 +38,7 @@ impl Messenger {
     }
 }
 
+/*
 pub async fn send_message_to_all_devices(
     sender_session: &SecureSession,
     recipient_devices: &[Device],
@@ -58,3 +61,4 @@ pub async fn send_message_to_all_devices(
         store.store_message(&device.id.to_string(), msg).await;
     }
 }
+*/

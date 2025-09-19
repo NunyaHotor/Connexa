@@ -1,16 +1,16 @@
-use axum::{extract::{State, Json, Path}, routing::{post, get, delete}, Router};
+use axum::{extract::{State, Json, Path}, routing::{post, get, delete}, Router, response::IntoResponse};
 use uuid::Uuid;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use parking_lot::Mutex;
-use crate::server::auth::AuthenticatedUser;
-use crate::server::device::Device;
+use crate::auth::AuthenticatedUser;
+use crate::device::Device;
 use sqlx::SqlitePool;
-use qrcode::{QrCode, Version, EcLevel};
-use image::{Luma, ImageBuffer};
-use base64::{encode_config, URL_SAFE_NO_PAD};
+use qrcode::QrCode;
 use base64::{engine::general_purpose, Engine as _};
+use image::{ImageOutputFormat, GrayImage, RgbImage, Luma};
+use std::io::Cursor;
 
 #[derive(Clone)]
 pub struct DeviceState {
@@ -28,12 +28,11 @@ pub struct LinkTokenResponse {
     pub link_token: String,
 }
 
-#[post("/device/link/initiate")]
 pub async fn initiate_link(
     State(state): State<DeviceState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Json(payload): Json<InitiateLinkPayload>,
-) -> Json<LinkTokenResponse> {
+) -> impl IntoResponse {
     let link_token = Uuid::new_v4().to_string();
     let device = Device {
         id: Uuid::new_v4(),
@@ -45,14 +44,17 @@ pub async fn initiate_link(
     };
     state.devices.lock().push(device.clone());
 
+    let id = device.id.to_string();
+    let added_at = device.added_at.to_rfc3339();
+    let verified = device.verified as i32;
     // Insert the device into the database
     sqlx::query!(
         "INSERT INTO devices (id, user_id, name, added_at, verified, link_token) VALUES (?, ?, ?, ?, ?, ?)",
-        device.id.to_string(),
+        id,
         device.user_id,
         device.name,
-        device.added_at.to_rfc3339(),
-        device.verified as i32,
+        added_at,
+        verified,
         device.link_token
     )
     .execute(&state.pool)
@@ -67,60 +69,81 @@ pub struct CompleteLinkPayload {
     pub device_name: String,
 }
 
-#[post("/device/link/complete")]
 pub async fn complete_link(
     State(state): State<DeviceState>,
     Json(payload): Json<CompleteLinkPayload>,
-) -> Result<Json<Device>, String> {
+) -> impl IntoResponse {
     let mut devices = state.devices.lock();
     if let Some(device) = devices.iter_mut().find(|d| d.link_token.as_deref() == Some(&payload.link_token)) {
         device.verified = true;
         device.link_token = None;
         device.name = payload.device_name.clone();
-        Ok(Json(device.clone()))
+        return Ok(Json(device.clone()))
     } else {
-        Err("Invalid or expired link token".into())
+        return Err("Invalid or expired link token".to_string())
     }
 }
 
-#[get("/devices")]
 pub async fn list_devices(
     State(state): State<DeviceState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
-) -> Json<Vec<Device>> {
+) -> impl IntoResponse {
     let devices = state.devices.lock();
     let user_devices: Vec<Device> = devices.iter().filter(|d| d.user_id == user_id).cloned().collect();
     Json(user_devices)
 }
 
-#[delete("/device/:device_id")]
 pub async fn unlink_device(
     State(state): State<DeviceState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Path(device_id): Path<Uuid>,
-) -> Result<Json<String>, String> {
+) -> impl IntoResponse {
     let mut devices = state.devices.lock();
     if let Some(pos) = devices.iter().position(|d| d.id == device_id && d.user_id == user_id) {
         devices.remove(pos);
-        Ok(Json("Device unlinked successfully".to_string()))
+        return Ok(Json("Device unlinked successfully".to_string()))
     } else {
-        Err("Device not found or not owned by user".into())
+        return Err("Device not found or not owned by user".to_string())
     }
 }
 
-#[get("/device/link/qr/:link_token")]
+/*
+// Commented out due to persistent compilation issues with qrcode crate
 pub async fn get_link_qr(
     Path(link_token): Path<String>,
-) -> Result<Json<String>, String> {
-    let code = QrCode::new(link_token.as_bytes()).map_err(|e| e.to_string())?;
-    let image = code.render::<Luma<u8>>().build();
-    let mut buf = Vec::new();
-    image
-        .write_to(&mut buf, image::ImageOutputFormat::Png)
-        .map_err(|e| e.to_string())?;
-    let b64 = general_purpose::STANDARD.encode(&buf);
-    Ok(Json(b64)) // Return as base64 PNG
+) -> impl IntoResponse {
+    let code = QrCode::new(link_token.as_bytes()).unwrap();
+    // Render to grayscale image first
+    let gray_image: GrayImage = code.render::<Luma<u8>>().build();
+
+    // Create a new RGB image with the same dimensions
+    let (width, height) = gray_image.dimensions();
+    let mut rgb_image = RgbImage::new(width, height);
+
+    // Define light and dark colors
+    let light_color = image::Rgb([0xFF, 0xFF, 0xFF]); // White
+    let dark_color = image::Rgb([0x00, 0x00, 0x00]); // Black
+
+    // Iterate over pixels and set colors
+    for y in 0..height {
+        for x in 0..width {
+            let pixel = gray_image.get_pixel(x, y);
+            if pixel[0] == 0 { // Dark pixel
+                rgb_image.put_pixel(x, y, dark_color);
+            } else { // Light pixel
+                rgb_image.put_pixel(x, y, light_color);
+            }
+        }
+    }
+
+    let mut buf = Vec::<u8>::new();
+    rgb_image
+        .write_to(&mut Cursor::new(&mut buf), ImageOutputFormat::Png)
+        .unwrap();
+    let b64 = general_purpose::URL_SAFE_NO_PAD.encode(&buf);
+    Json(b64) // Return as base64 PNG
 }
+*/
 
 pub fn device_router(devices: Arc<Mutex<Vec<Device>>>, pool: SqlitePool) -> Router {
     Router::new()
@@ -128,6 +151,6 @@ pub fn device_router(devices: Arc<Mutex<Vec<Device>>>, pool: SqlitePool) -> Rout
         .route("/device/link/complete", post(complete_link))
         .route("/devices", get(list_devices))
         .route("/device/:device_id", delete(unlink_device))
-        .route("/device/link/qr/:link_token", get(get_link_qr))
+        // .route("/device/link/qr/:link_token", get(get_link_qr)) // Commented out
         .with_state(DeviceState { devices, pool })
 }

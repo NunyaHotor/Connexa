@@ -24,15 +24,9 @@ pub struct SignalMessage {
 }
 
 #[derive(Clone)]
-pub struct SignalingState {
+pub struct SignalingAppState {
     pub peers: Arc<RwLock<HashMap<String, mpsc::UnboundedSender<Message>>>>,
-    pub tx: broadcast::Sender<String>,
-}
-
-#[derive(Clone)]
-pub struct GroupCallState {
     pub rooms: Arc<RwLock<HashMap<String, HashSet<String>>>>, // room_id -> set of user_ids
-    pub peers: Arc<RwLock<HashMap<String, mpsc::UnboundedSender<Message>>>>,
     pub tx: broadcast::Sender<String>,
 }
 
@@ -61,7 +55,7 @@ async fn extract_user_id<B>(req: &Request<B>) -> Result<String, String> {
 
 pub async fn signaling_ws(
     ws: WebSocketUpgrade,
-    State(state): State<SignalingState>,
+    State(state): State<SignalingAppState>,
     req: Request<()>,
 ) -> impl IntoResponse {
     match extract_user_id(&req).await {
@@ -74,7 +68,7 @@ pub async fn signaling_ws(
     }
 }
 
-async fn handle_socket(mut socket: WebSocket, state: SignalingState, user_id: String) {
+async fn handle_socket(mut socket: WebSocket, state: SignalingAppState, user_id: String) {
     let (tx, mut rx) = mpsc::unbounded_channel();
     let mut broadcast_rx = state.tx.subscribe();
 
@@ -108,7 +102,7 @@ async fn handle_socket(mut socket: WebSocket, state: SignalingState, user_id: St
     }
 }
 
-pub fn signaling_router(state: SignalingState) -> Router {
+pub fn signaling_router(state: SignalingAppState) -> Router {
     Router::new().route("/signaling", get(signaling_ws)).with_state(state)
 }
 
@@ -135,14 +129,14 @@ pub fn signaling_router(state: SignalingState) -> Router {
 // pkey=/path/to/your/privkey.pem     # Optional, for TLS
 
 // Add a function to join a room
-pub async fn join_room(state: &GroupCallState, room_id: &str, user_id: &str) {
+pub async fn join_room(state: &SignalingAppState, room_id: &str, user_id: &str) {
     let mut rooms = state.rooms.write().await;
     rooms.entry(room_id.to_string()).or_default().insert(user_id.to_string());
 }
 
 // Add a function to broadcast signaling messages to all users in a room (except sender)
 pub async fn broadcast_to_room(
-    state: &GroupCallState,
+    state: &SignalingAppState,
     room_id: &str,
     from_user: &str,
     msg: &SignalMessage,

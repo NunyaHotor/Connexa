@@ -1,0 +1,2 @@
+fn(State<DeviceState>, AuthenticatedUser, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = Result<axum::Json<std::string::String>, std::string::String>> {unlink_device}
+fn(State<DeviceState>, AuthenticatedUser, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = Result<axum::Json<std::string::String>, std::string::String>> {unlink_device}: Handler<_, _, _>

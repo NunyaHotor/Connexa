@@ -1,0 +1,2 @@
+fn(axum::extract::State<DeviceState>, AuthenticatedUser, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = impl IntoResponse> {unlink_device}
+fn(axum::extract::State<DeviceState>, AuthenticatedUser, axum::extract::Path<Uuid>) -> impl std::future::Future<Output = impl IntoResponse> {unlink_device}: Handler<_, _, _>

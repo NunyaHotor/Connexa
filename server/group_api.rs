@@ -1,15 +1,12 @@
-use axum::{
-    extract::{State, Json, Path},
-    routing::{post, get},
-    Router,
-};
+use axum::{extract::{State, Json, Path}, routing::{post, get}, Router, response::IntoResponse};
 use std::sync::Arc;
 use uuid::Uuid;
-use crate::server::group::{Group, GroupInvite};
-use crate::server::auth::AuthenticatedUser;
+use crate::group::{Group, GroupInvite};
+use crate::auth::AuthenticatedUser;
 use chrono::Utc;
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
+use axum::http::StatusCode;
 
 #[derive(Clone)]
 pub struct GroupState {
@@ -26,12 +23,11 @@ pub struct InvitePayload {
     pub user_id: String,
 }
 
-#[post("/group")]
 pub async fn create_group(
     State(state): State<GroupState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Json(payload): Json<CreateGroupPayload>,
-) -> Json<Group> {
+) -> impl IntoResponse {
     let group = Group {
         id: Uuid::new_v4(),
         name: payload.name,
@@ -42,76 +38,76 @@ pub async fn create_group(
     Json(group)
 }
 
-#[get("/group/:group_id")]
 pub async fn get_group(
     State(state): State<GroupState>,
     Path(group_id): Path<Uuid>,
-) -> Option<Json<Group>> {
+) -> impl IntoResponse {
     let groups = state.groups.lock();
-    groups.iter().find(|g| g.id == group_id).cloned().map(Json)
+    if let Some(group) = groups.iter().find(|g| g.id == group_id).cloned() {
+        (StatusCode::OK, Json(group))
+    } else {
+        (StatusCode::NOT_FOUND, Json("Group not found".to_string()))
+    }
 }
 
-#[post("/group/:group_id/invite")]
 pub async fn invite_to_group(
     State(state): State<GroupState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Path(group_id): Path<Uuid>,
     Json(payload): Json<InvitePayload>,
-) -> Result<Json<Group>, String> {
+) -> impl IntoResponse {
     let mut groups = state.groups.lock();
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
         if !group.members.contains(&user_id) {
-            return Err("Only group members can invite.".into());
+            return Err("Only group members can invite.".to_string());
         }
         if !group.members.contains(&payload.user_id) {
             group.members.push(payload.user_id.clone());
         }
-        Ok(Json(group.clone()))
+        return Ok(Json(group.clone()))
     } else {
-        Err("Group not found".into())
+        return Err("Group not found".to_string())
     }
 }
 
-#[post("/group/:group_id/leave")]
 pub async fn leave_group(
     State(state): State<GroupState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Path(group_id): Path<Uuid>,
-) -> Result<Json<Group>, String> {
+) -> impl IntoResponse {
     let mut groups = state.groups.lock();
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
         if let Some(pos) = group.members.iter().position(|m| m == &user_id) {
             group.members.remove(pos);
-            Ok(Json(group.clone()))
+            return Ok(Json(group.clone()))
         } else {
-            Err("You are not a member of this group.".into())
+            return Err("You are not a member of this group.".to_string())
         }
     } else {
-        Err("Group not found".into())
+        return Err("Group not found".to_string())
     }
 }
 
-#[post("/group/:group_id/remove")]
 pub async fn remove_from_group(
     State(state): State<GroupState>,
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Path(group_id): Path<Uuid>,
     Json(payload): Json<InvitePayload>,
-) -> Result<Json<Group>, String> {
+) -> impl IntoResponse {
     let mut groups = state.groups.lock();
     if let Some(group) = groups.iter_mut().find(|g| g.id == group_id) {
         // Only allow removal by group members (could restrict to admins)
         if !group.members.contains(&user_id) {
-            return Err("Only group members can remove.".into());
+            return Err("Only group members can remove.".to_string());
         }
         if let Some(pos) = group.members.iter().position(|m| m == &payload.user_id) {
             group.members.remove(pos);
-            Ok(Json(group.clone()))
+            return Ok(Json(group.clone()))
         } else {
-            Err("User is not a member of this group.".into())
+            return Err("User is not a member of this group.".to_string())
         }
     } else {
-        Err("Group not found".into())
+        return Err("Group not found".to_string())
     }
 }
 
@@ -124,6 +120,3 @@ pub fn group_router(groups: Arc<Mutex<Vec<Group>>>) -> Router {
         .route("/group/:group_id/remove", post(remove_from_group))
         .with_state(GroupState { groups })
 }
-
-openmls = "0.11"
-openmls_rust_crypto = "0.11"

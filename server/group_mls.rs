@@ -1,5 +1,6 @@
 use openmls::prelude::*;
 use uuid::Uuid;
+use anyhow::Error;
 
 pub struct GroupSession {
     pub group_id: Uuid,
@@ -7,13 +8,14 @@ pub struct GroupSession {
 }
 
 impl GroupSession {
-    pub fn new(group_id: Uuid, creator_credential: CredentialWithKey, backend: &impl OpenMlsCryptoProvider) -> Self {
+    pub fn new(group_id: Uuid, creator_credential: CredentialWithKey, backend: &impl OpenMlsProvider) -> Self {
         let group_id_bytes = group_id.as_bytes();
-        let mls_group = MlsGroup::builder()
-            .with_group_id(GroupId::from_slice(group_id_bytes))
-            .with_credential(creator_credential)
-            .build(backend)
-            .expect("Failed to create MLS group");
+        let mls_group = MlsGroup::new(
+            backend,
+            &group_id_bytes,
+            creator_credential.credential(),
+            creator_credential.private_key(),
+        ).expect("Failed to create MLS group");
         Self { group_id, mls_group }
     }
 
@@ -21,19 +23,17 @@ impl GroupSession {
     pub fn add_member(
         &mut self,
         new_member_credential: CredentialWithKey,
-        backend: &impl OpenMlsCryptoProvider,
-    ) -> Result<(), MlsGroupError> {
-        let add_proposal = self.mls_group.create_add_proposal(
+        backend: &impl OpenMlsProvider,
+    ) -> Result<(), Error> {
+        let add_proposal = self.mls_group.propose_add(
             backend,
             &new_member_credential,
         )?;
-        let commit = self.mls_group.create_commit(
+        let (commit, welcome) = self.mls_group.commit(
             backend,
             &[add_proposal],
-            &[],
-            false,
         )?;
-        self.mls_group.apply_commit(commit.staged_commit, &[add_proposal], backend)?;
+        self.mls_group.apply_commit(commit, backend)?;
         Ok(())
     }
 
@@ -41,42 +41,39 @@ impl GroupSession {
     pub fn remove_member(
         &mut self,
         leaf_index: LeafNodeIndex,
-        backend: &impl OpenMlsCryptoProvider,
-    ) -> Result<(), MlsGroupError> {
-        let remove_proposal = self.mls_group.create_remove_proposal(
+        backend: &impl OpenMlsProvider,
+    ) -> Result<(), Error> {
+        let remove_proposal = self.mls_group.propose_remove(
             backend,
             leaf_index,
         )?;
-        let commit = self.mls_group.create_commit(
+        let (commit, welcome) = self.mls_group.commit(
             backend,
             &[remove_proposal],
-            &[],
-            false,
         )?;
-        self.mls_group.apply_commit(commit.staged_commit, &[remove_proposal], backend)?;
+        self.mls_group.apply_commit(commit, backend)?;
         Ok(())
     }
 
     /// Encrypt a group message.
     pub fn encrypt_message(
         &self,
-        backend: &impl OpenMlsCryptoProvider,
+        backend: &impl OpenMlsProvider,
         plaintext: &[u8],
-    ) -> Result<MlsCiphertext, MlsGroupError> {
-        self.mls_group.create_application_message(
+    ) -> Result<HpkeCiphertext, Error> {
+        self.mls_group.create_message(
             backend,
             plaintext,
-            &[],
         )
     }
 
     /// Decrypt a group message.
     pub fn decrypt_message(
         &mut self,
-        backend: &impl OpenMlsCryptoProvider,
-        ciphertext: &MlsCiphertext,
-    ) -> Result<Vec<u8>, MlsGroupError> {
-        let message = self.mls_group.decrypt(backend, ciphertext, &[])?;
-        Ok(message.into_bytes())
+        backend: &impl OpenMlsProvider,
+        ciphertext: &HpkeCiphertext,
+    ) -> Result<Vec<u8>, Error> {
+        let message = self.mls_group.parse_message(ciphertext.as_slice(), backend)?;
+        Ok(message.as_bytes().to_vec())
     }
 }

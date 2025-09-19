@@ -1,0 +1,2 @@
+fn(State<GroupMlsState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<Vec<u8>>) -> impl std::future::Future<Output = Result<axum::Json<Vec<u8>>, std::string::String>> {receive_group_message}
+fn(State<GroupMlsState>, AuthenticatedUser, axum::extract::Path<Uuid>, axum::Json<Vec<u8>>) -> impl std::future::Future<Output = Result<axum::Json<Vec<u8>>, std::string::String>> {receive_group_message}: Handler<_, _, _>
