@@ -1,0 +1,2 @@
+fn(axum::extract::State<Arc<MessageStore>>, axum::Json<EncryptedMessage>) -> impl futures::Future<Output = Result<(), std::string::String>> {receive_federated_message}
+fn(axum::extract::State<Arc<MessageStore>>, axum::Json<EncryptedMessage>) -> impl futures::Future<Output = Result<(), std::string::String>> {receive_federated_message}: Handler<_, _, _>

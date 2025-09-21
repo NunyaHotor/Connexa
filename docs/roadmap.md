@@ -63,11 +63,11 @@ Connexa is being developed in **phases**, starting with a secure core and expand
 ## Phase E — Decentralization & Federation 🌍
 **Goal:** Expand architecture beyond centralized relays.
 
-- [ ] Federated homeservers (Matrix-style interoperability)
-- [ ] libp2p integration for peer discovery and optional P2P routing
-- [ ] IPFS/OrbitDB for optional decentralized media storage
-- [ ] Private contact discovery (PSI/OPRF protocol)
-- [ ] Metadata protection upgrades (sealed sender, batching, cover traffic)
+- [x] Federated homeservers (Matrix-style interoperability)
+- [x] libp2p integration for peer discovery and optional P2P routing
+- [x] IPFS/OrbitDB for optional decentralized media storage
+- [x] Private contact discovery (PSI/OPRF protocol)
+- [x] Metadata protection upgrades (sealed sender, batching, cover traffic)
 
 ---
 

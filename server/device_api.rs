@@ -7,10 +7,7 @@ use parking_lot::Mutex;
 use crate::auth::AuthenticatedUser;
 use crate::device::Device;
 use sqlx::SqlitePool;
-use qrcode::QrCode;
-use base64::{engine::general_purpose, Engine as _};
-use image::{ImageOutputFormat, GrayImage, RgbImage, Luma};
-use std::io::Cursor;
+
 
 #[derive(Clone)]
 pub struct DeviceState {

@@ -1,13 +1,21 @@
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum GroupType {
+    Private,
+    Channel,
+    Public,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Group {
     pub id: Uuid,
     pub name: String,
     pub created_at: DateTime<Utc>,
     pub members: Vec<String>, // user IDs
+    pub group_type: GroupType,
 }
 
 #[derive(Clone, Debug)]

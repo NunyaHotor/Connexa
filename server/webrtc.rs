@@ -1,7 +1,7 @@
 use axum::{routing::post, Router, Json};
 use webrtc::api::APIBuilder;
 use webrtc::peer_connection::RTCPeerConnection;
-use webrtc::ice_transport::ice_candidate::{RTCIceCandidate, RTCIceCandidateInit};
+use webrtc::ice_transport::ice_candidate::RTCIceCandidate;
 use webrtc::peer_connection::sdp::session_description::RTCSessionDescription;
 use webrtc::peer_connection::configuration::RTCConfiguration;
 use webrtc::error::{Result, Error};

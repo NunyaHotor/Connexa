@@ -1,0 +1,7 @@
+/home/mawutor/Documents/Connexa/server/target/debug/deps/smol_str-7feb2746b07f8465.d: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/smol_str-0.2.2/src/lib.rs
+
+/home/mawutor/Documents/Connexa/server/target/debug/deps/libsmol_str-7feb2746b07f8465.rlib: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/smol_str-0.2.2/src/lib.rs
+
+/home/mawutor/Documents/Connexa/server/target/debug/deps/libsmol_str-7feb2746b07f8465.rmeta: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/smol_str-0.2.2/src/lib.rs
+
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/smol_str-0.2.2/src/lib.rs:

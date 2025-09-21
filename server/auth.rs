@@ -1,6 +1,6 @@
 use axum::{async_trait, extract::{FromRequestParts, TypedHeader}, http::request::Parts};
 use axum::headers::Authorization;
-use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm, TokenData, errors::Error as JwtError};
+use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm, TokenData};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

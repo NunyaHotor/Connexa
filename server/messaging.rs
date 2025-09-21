@@ -1,7 +1,6 @@
 use crate::crypto::session::SecureSession;
 use crate::connexa::EncryptedMessage;
-use crate::device::Device;
-use crate::relay::MessageStore;
+
 use sha2::{Sha256, Digest};
 use x25519_dalek::PublicKey;
 
