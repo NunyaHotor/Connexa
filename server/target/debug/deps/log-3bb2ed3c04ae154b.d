@@ -1,0 +1,13 @@
+/home/mawutor/Documents/Connexa/server/target/debug/deps/log-3bb2ed3c04ae154b.d: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/lib.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/macros.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/serde.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/mod.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/error.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/key.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/source.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/value.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/__private_api.rs
+
+/home/mawutor/Documents/Connexa/server/target/debug/deps/liblog-3bb2ed3c04ae154b.rmeta: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/lib.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/macros.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/serde.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/mod.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/error.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/key.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/source.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/value.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/__private_api.rs
+
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/lib.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/macros.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/serde.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/mod.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/error.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/key.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/source.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/kv/value.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.28/src/__private_api.rs:

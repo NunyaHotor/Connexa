@@ -13,19 +13,16 @@ use crate::webrtc::webrtc_router;
 use crate::federation_api::federation_router;
 use crate::federation::FederationState;
 use crate::p2p::{MyBehaviour, MyBehaviourEvent};
-use parking_lot::Mutex;
-use tokio::time::{interval, Duration};
 use libp2p::{
-    core::upgrade,
+    gossipsub::{Gossipsub, GossipsubConfig, MessageAuthenticity},
     identity,
-    mplex,
+    kad::{Kademlia, store::MemoryStore},
     noise,
-    swarm::{SwarmBuilder},
-    tcp::TokioTcpConfig,
-    Transport,
+    swarm::SwarmBuilder,
+    tcp,
+    yamux,
 };
-use libp2p::kad::{Kademlia, store::MemoryStore};
-use libp2p_gossipsub::{Gossipsub, MessageAuthenticity};
+
 
 use tokio::sync::mpsc;
 
@@ -71,17 +68,26 @@ async fn main() {
     let local_keys = identity::Keypair::generate_ed25519();
     let local_peer_id = local_keys.public().to_peer_id();
 
-    let transport = TokioTcpConfig::new()
-        .nodelay(true)
-        .upgrade(upgrade::Version::V1)
-        .authenticate(noise::NoiseAuthenticated::xx(&local_keys).unwrap())
-        .multiplex(mplex::MplexConfig::new())
-        .boxed();
-
-    let behaviour = MyBehaviour {
-        kademlia: Kademlia::new(local_peer_id, MemoryStore::new(local_peer_id.clone())),
-        gossipsub: Gossipsub::new(MessageAuthenticity::Signed(local_keys.clone()), Default::default()).unwrap(),
-    };
+    let mut swarm = SwarmBuilder::with_existing_identity(local_keys.clone())
+        .with_tokio()
+        .with_tcp(
+            tcp::Config::default(),
+            noise::Config::new,
+            yamux::Config::default,
+        )
+        .unwrap()
+        .with_behaviour(|key| {
+            let gossipsub = Gossipsub::new(
+                MessageAuthenticity::from(key.public()),
+                GossipsubConfig::default(),
+            )
+            .unwrap();
+            let kademlia = Kademlia::new(local_peer_id, MemoryStore::new(local_peer_id.clone()));
+            MyBehaviour { kademlia, gossipsub }
+        })
+        .unwrap()
+        .with_swarm_config(|c| c.with_idle_connection_timeout(std::time::Duration::from_secs(30)))
+        .build();
 
     let swarm = Arc::new(Mutex::new(swarm));
 

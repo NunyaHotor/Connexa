@@ -1,0 +1,12 @@
+/home/mawutor/Documents/Connexa/server/target/debug/deps/libp2p_identify-a3b3af7b4f4b2fd6.d: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/lib.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/behaviour.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/handler.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/protocol.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/generated/mod.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/generated/structs.rs
+
+/home/mawutor/Documents/Connexa/server/target/debug/deps/liblibp2p_identify-a3b3af7b4f4b2fd6.rmeta: /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/lib.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/behaviour.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/handler.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/protocol.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/generated/mod.rs /home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/generated/structs.rs
+
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/lib.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/behaviour.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/handler.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/protocol.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/generated/mod.rs:
+/home/mawutor/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libp2p-identify-0.44.2/src/generated/structs.rs:
+
+# env-dep:CARGO_PKG_VERSION=0.44.2

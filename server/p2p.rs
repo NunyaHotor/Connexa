@@ -1,19 +1,13 @@
+
 use libp2p::{
-    core::upgrade,
-    futures::StreamExt,
-    identity,
-    mplex,
-    noise,
-    swarm::{Swarm, SwarmBuilder, NetworkBehaviour, SwarmEvent},
-    tcp::TokioTcpConfig,
-    Transport,
+    gossipsub::{Gossipsub, GossipsubEvent, IdentTopic as Topic, MessageAuthenticity, ValidationMode},
+    kad::{Kademlia, KademliaEvent, store::MemoryStore},
+    swarm::{NetworkBehaviour, Swarm, SwarmEvent},
     Multiaddr,
     PeerId,
+    futures::StreamExt,
 };
-use libp2p::kad::{Kademlia, KademliaEvent, store::MemoryStore};
-use libp2p_gossipsub::{Gossipsub, GossipsubEvent, IdentTopic as Topic, MessageAuthenticity, ValidationMode};
 use std::error::Error;
-use tokio::io::{self, AsyncBufReadExt};
 use tokio::time::{interval, Duration};
 use std::sync::Arc;
 use parking_lot::Mutex;

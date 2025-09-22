@@ -1,0 +1,2 @@
+fn(axum::extract::State<Arc<FederationState>>, axum::Json<federation::Server>) -> impl futures::Future<Output = Result<(), std::string::String>> {register_server}
+fn(axum::extract::State<Arc<FederationState>>, axum::Json<federation::Server>) -> impl futures::Future<Output = Result<(), std::string::String>> {register_server}: Handler<_, _, _>
