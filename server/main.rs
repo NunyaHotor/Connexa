@@ -13,15 +13,17 @@ use crate::webrtc::webrtc_router;
 use crate::federation_api::federation_router;
 use crate::federation::FederationState;
 use crate::p2p::{MyBehaviour, MyBehaviourEvent};
-use libp2p::{
-    gossipsub::{Gossipsub, GossipsubConfig, MessageAuthenticity},
-    identity,
-    kad::{Kademlia, store::MemoryStore},
-    noise,
-    swarm::SwarmBuilder,
-    tcp,
-    yamux,
-};
+use libp2p_gossipsub::{Gossipsub, GossipsubConfig, MessageAuthenticity};
+use libp2p::identity;
+use libp2p_kad::{Kademlia, store::MemoryStore};
+use libp2p::noise;
+use libp2p_swarm::SwarmBuilder;
+use libp2p::tcp;
+use libp2p::yamux;
+use libp2p::PeerId;
+use libp2p_tcp as tcp;
+use libp2p_yamux as yamux;
+use libp2p::PeerId;
 
 
 use tokio::sync::mpsc;

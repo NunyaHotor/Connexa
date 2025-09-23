@@ -1,12 +1,13 @@
-
-use libp2p::{
-    gossipsub::{Gossipsub, GossipsubEvent, IdentTopic as Topic, MessageAuthenticity, ValidationMode},
-    kad::{Kademlia, KademliaEvent, store::MemoryStore},
-    swarm::{NetworkBehaviour, Swarm, SwarmEvent},
-    Multiaddr,
-    PeerId,
-    futures::StreamExt,
-};
+use libp2p_gossipsub::{Gossipsub, GossipsubEvent, IdentTopic as Topic, MessageAuthenticity, ValidationMode};
+use libp2p::identity;
+use libp2p_kad::{Kademlia, KademliaEvent, store::MemoryStore};
+use libp2p::noise;
+use libp2p_swarm::{SwarmBuilder, NetworkBehaviour, Swarm, SwarmEvent};
+use libp2p::tcp::Config as TokioTcpConfig;
+use libp2p::yamux;
+use libp2p::PeerId;
+use libp2p::Multiaddr;
+use libp2p::Multiaddr;
 use std::error::Error;
 use tokio::time::{interval, Duration};
 use std::sync::Arc;
@@ -93,4 +94,43 @@ pub async fn new(swarm: Arc<Mutex<Swarm<MyBehaviour>>>) -> Result<(), Box<dyn Er
             }
         }
     }
+}
+
+pub fn get_peer_id(swarm: &Swarm<MyBehaviour>) -> PeerId {
+    *swarm.local_peer_id()
+}
+
+pub fn get_all_peers(swarm: &Swarm<MyBehaviour>) -> Vec<PeerId> {
+    swarm.behaviour().kademlia.kbuckets().map(|kbucket| kbucket.iter().map(|entry| *entry.node.key.preimage()).collect::<Vec<_>>()).flatten().collect()
+}
+
+pub fn get_listening_addresses(swarm: &Swarm<MyBehaviour>) -> Vec<Multiaddr> {
+    swarm.listeners().cloned().collect()
+}
+
+pub fn get_external_addresses(swarm: &Swarm<MyBehaviour>) -> Vec<Multiaddr> {
+    swarm.external_addresses().cloned().collect()
+}
+
+pub fn get_kad_dht_info(swarm: &Swarm<MyBehaviour>) -> String {
+    format!("{:?}", swarm.behaviour().kademlia)
+}
+
+pub fn get_gossipsub_info(swarm: &Swarm<MyBehaviour>) -> String {
+    format!("{:?}", swarm.behaviour().gossipsub)
+}
+
+pub fn get_swarm_info(swarm: &Swarm<MyBehaviour>) -> String {
+    format!("{:?}", swarm)
+}
+
+pub fn get_network_info(swarm: &Swarm<MyBehaviour>) -> String {
+    let mut info = String::new();
+    info.push_str(&format!("Local Peer ID: {:?}\n", get_peer_id(swarm)));
+    info.push_str(&format!("Listening Addresses: {:?}\n", get_listening_addresses(swarm)));
+    info.push_str(&format!("External Addresses: {:?}\n", get_external_addresses(swarm)));
+    info.push_str(&format!("Peers: {:?}\n", get_all_peers(swarm)));
+    info.push_str(&format!("Kademlia DHT: {:?}\n", get_kad_dht_info(swarm)));
+    info.push_str(&format!("Gossipsub: {:?}\n", get_gossipsub_info(swarm)));
+    info
 }
