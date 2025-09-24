@@ -1,0 +1,1 @@
+fn(axum::Json<RTCIceCandidate>) -> impl futures::Future<Output = Result<(), webrtc::Error>> {handle_ice_candidate_route}: Handler<_, _, _>

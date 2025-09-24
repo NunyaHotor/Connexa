@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>, axum::extract::Path<std::string::String>) -> impl futures::Future<Output = Result<Vec<u8>, std::string::String>> {download_media}
+fn(axum::extract::State<AppState>, axum::extract::Path<std::string::String>) -> impl futures::Future<Output = Result<Vec<u8>, std::string::String>> {download_media}: Handler<_, _, _>

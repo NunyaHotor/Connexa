@@ -1,0 +1,2 @@
+fn(axum::Json<RTCSessionDescription>) -> impl futures::Future<Output = Result<axum::Json<RTCSessionDescription>, webrtc::Error>> {handle_offer_route}
+fn(axum::Json<RTCSessionDescription>) -> impl futures::Future<Output = Result<axum::Json<RTCSessionDescription>, webrtc::Error>> {handle_offer_route}: Handler<_, _, _>

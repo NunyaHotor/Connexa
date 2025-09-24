@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>, AuthenticatedUser, axum::Json<SendMessagePayload>) -> impl futures::Future<Output = Result<(), std::string::String>> {post_message}
+fn(axum::extract::State<AppState>, AuthenticatedUser, axum::Json<SendMessagePayload>) -> impl futures::Future<Output = Result<(), std::string::String>> {post_message}: Handler<_, _, _>

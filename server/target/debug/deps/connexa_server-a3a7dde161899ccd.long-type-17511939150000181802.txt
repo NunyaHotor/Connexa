@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>, axum::Json<BlindedElementPayload>) -> impl futures::Future<Output = Result<axum::Json<BlindedElementPayload>, std::string::String>> {evaluate_element}
+fn(axum::extract::State<AppState>, axum::Json<BlindedElementPayload>) -> impl futures::Future<Output = Result<axum::Json<BlindedElementPayload>, std::string::String>> {evaluate_element}: Handler<_, _, _>

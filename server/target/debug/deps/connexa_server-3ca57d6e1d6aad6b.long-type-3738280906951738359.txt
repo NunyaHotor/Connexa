@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>, axum::body::Bytes) -> impl futures::Future<Output = Result<std::string::String, std::string::String>> {upload_media}
+fn(axum::extract::State<AppState>, axum::body::Bytes) -> impl futures::Future<Output = Result<std::string::String, std::string::String>> {upload_media}: Handler<_, _, _>

@@ -1,4 +1,4 @@
-[package]
+
 name = "connexa-server"
 version = "0.1.0"
 edition = "2021"
@@ -44,4 +44,4 @@ tonic-build = "0.8"
 
 [[bin]]
 name = "connexa-server"
-path = "main.rs"
+path = "src/main.rs"

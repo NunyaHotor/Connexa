@@ -1,0 +1,2 @@
+fn(axum::Json<BlindedElementPayload>) -> impl futures::Future<Output = Result<axum::Json<BlindedElementPayload>, std::string::String>> {blind_element}
+fn(axum::Json<BlindedElementPayload>) -> impl futures::Future<Output = Result<axum::Json<BlindedElementPayload>, std::string::String>> {blind_element}: Handler<_, _, _>
