@@ -1,0 +1,26 @@
+Scanned files: 193
+Errors: 0
+Duplicate groups: 4
+Duplicate files (beyond one per group): 9
+
+HASH 7386b2017fcfe28bf67af0ad752bf2b06086ae3b1a4ef717e21d676f00114848 (3 files)
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jibri/rootfs/etc/services.d/50-autoscaler-sidecar/run
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jigasi/rootfs/etc/services.d/50-autoscaler-sidecar/run
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jvb/rootfs/etc/services.d/50-autoscaler-sidecar/run
+
+HASH d6a7ee9ad9ae08732788a0afa94383284008ee697c6162eb22a219f4449c3fe7 (2 files)
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jigasi/rootfs/opt/jitsi/shutdown.sh
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jvb/rootfs/opt/jitsi/shutdown.sh
+
+HASH e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (6 files)
+  /home/mawutor/Documents/Connexa/.sentry-native/c646db26-f316-4043-5ab9-7794faf56f1e.run.lock
+  /home/mawutor/Documents/Connexa/.sentry-native/c646db26-f316-4043-5ab9-7794faf56f1e.run/__sentry-event
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/base/rootfs/etc/cont-finish.d/.gitkeep
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/base/rootfs/etc/cont-init.d/.gitkeep
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/base/rootfs/etc/fix-attrs.d/.gitkeep
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/base/rootfs/etc/services.d/.gitkeep
+
+HASH f21836360e53fc46c28cbe5fbbc5c166a81c0c36daab63f542f2a607e952a18c (2 files)
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jibri/rootfs/etc/chromium/policies/managed/managed_policies.json
+  /home/mawutor/Documents/Connexa/docker-jitsi-meet/jibri/rootfs/etc/opt/chrome/policies/managed/managed_policies.json
+
