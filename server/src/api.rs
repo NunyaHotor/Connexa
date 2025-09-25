@@ -37,6 +37,7 @@ pub struct AppState {
 pub struct SendMessagePayload {
     pub recipient_user_id: String,
     pub plaintext: Vec<u8>,
+    pub ttl_seconds: Option<i64>, // optional: message self-destruct TTL in seconds; 0 or None = no expiry
 }
 
 pub async fn post_message(
@@ -44,7 +45,8 @@ pub async fn post_message(
     AuthenticatedUser { user_id }: AuthenticatedUser,
     Json(payload): Json<SendMessagePayload>,
 ) -> Result<(), String> {
-    let recipient_user_id = payload.recipient_user_id;
+    let recipient_user_id = payload.recipient_user_id.clone();
+    let requested_ttl = payload.ttl_seconds.unwrap_or(0);
 
     // Check if the recipient is a group
     if let Ok(group_id) = Uuid::from_str(&recipient_user_id) {
@@ -69,8 +71,8 @@ pub async fn post_message(
                 dh_ratchet_pub: vec![],
                 message_number: 0,
                 timestamp: chrono::Utc::now().timestamp(),
-                target_device_id: recipient_user_id,
-                ttl: chrono::Utc::now().timestamp(),
+                target_device_id: recipient_user_id.clone(),
+                ttl: requested_ttl,
             };
             state.message_queue_sender.send(message).await.map_err(|e| e.to_string())?;
         }
@@ -86,8 +88,8 @@ pub async fn post_message(
                 dh_ratchet_pub: vec![],
                 message_number: 0,
                 timestamp: chrono::Utc::now().timestamp(),
-                target_device_id: recipient_user_id,
-                ttl: chrono::Utc::now().timestamp(),
+                target_device_id: recipient_user_id.clone(),
+                ttl: requested_ttl,
             };
             send_federated_message(server, &message).await.map_err(|e| e.to_string())?;
         } else {
@@ -100,8 +102,8 @@ pub async fn post_message(
             dh_ratchet_pub: vec![],
             message_number: 0,
             timestamp: chrono::Utc::now().timestamp(),
-            target_device_id: recipient_user_id,
-            ttl: chrono::Utc::now().timestamp(),
+            target_device_id: recipient_user_id.clone(),
+            ttl: requested_ttl,
         };
         state.message_queue_sender.send(message).await.map_err(|e| e.to_string())?;
     }

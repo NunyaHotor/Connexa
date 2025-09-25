@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/message_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:mime/mime.dart' as mime;
+import 'dart:typed_data';
 
 class Message {
   String text;
   bool isSentByUser;
   DateTime timestamp;
+  DateTime? expiresAt; // null means no local expiry
 
-  Message({required this.text, required this.isSentByUser, required this.timestamp});
+  Message({required this.text, required this.isSentByUser, required this.timestamp, this.expiresAt});
 }
 
 class ChatScreen extends StatefulWidget {
@@ -22,6 +27,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  int? _selectedTtlSeconds; // null = off
 
   @override
   void initState() {
@@ -40,7 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage(MessageProvider messageProvider) {
     if (_textController.text.isNotEmpty) {
-      messageProvider.sendMessage(_textController.text);
+      messageProvider.sendMessage(_textController.text, ttlSeconds: _selectedTtlSeconds);
       _textController.clear();
       // Scroll to the bottom after a short delay to allow the list to update
       Future.delayed(Duration(milliseconds: 50), () {
@@ -51,6 +57,79 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       });
     }
+  }
+
+  Future<void> _openAttachmentSheet(MessageProvider messageProvider) async {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Take Photo'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+                  if (photo != null) {
+                    final bytes = await photo.readAsBytes();
+                    final mt = mime.lookupMimeType(photo.name) ?? 'image/jpeg';
+                    await messageProvider.sendMedia(
+                      data: bytes,
+                      fileName: photo.name,
+                      mimeType: mt,
+                      ttlSeconds: _selectedTtlSeconds,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text('Pick Image'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    final bytes = await image.readAsBytes();
+                    final mt = mime.lookupMimeType(image.name) ?? 'image/jpeg';
+                    await messageProvider.sendMedia(
+                      data: bytes,
+                      fileName: image.name,
+                      mimeType: mt,
+                      ttlSeconds: _selectedTtlSeconds,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.attach_file),
+                title: Text('Pick File'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final result = await FilePicker.platform.pickFiles(withData: true);
+                  if (result != null && result.files.isNotEmpty) {
+                    final file = result.files.first;
+                    final Uint8List? bytes = file.bytes;
+                    if (bytes != null) {
+                      final mt = mime.lookupMimeType(file.name) ?? 'application/octet-stream';
+                      await messageProvider.sendMedia(
+                        data: bytes,
+                        fileName: file.name,
+                        mimeType: mt,
+                        ttlSeconds: _selectedTtlSeconds,
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -134,6 +213,31 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: Icon(Icons.attach_file, color: Theme.of(context).primaryColor),
+            onPressed: () => _openAttachmentSheet(messageProvider),
+          ),
+          PopupMenuButton<int?>(
+            icon: Icon(
+              Icons.timer,
+              color: _selectedTtlSeconds == null ? Colors.grey : Theme.of(context).primaryColor,
+            ),
+            onSelected: (value) {
+              setState(() {
+                _selectedTtlSeconds = value;
+              });
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<int?>(value: null, child: Text('Off')),
+              const PopupMenuDivider(),
+              const PopupMenuItem<int?>(value: 10, child: Text('10 seconds')),
+              const PopupMenuItem<int?>(value: 60, child: Text('1 minute')),
+              const PopupMenuItem<int?>(value: 3600, child: Text('1 hour')),
+              const PopupMenuItem<int?>(value: 86400, child: Text('1 day')),
+            ],
+            tooltip: 'Disappearing message timer',
+          ),
+          SizedBox(width: 4),
           Expanded(
             child: TextField(
               controller: _textController,
