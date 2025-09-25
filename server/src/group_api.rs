@@ -4,7 +4,7 @@ use uuid::Uuid;
 use chrono::Utc;
 use crate::auth::AuthenticatedUser;
 use crate::group::{Group, GroupType};
-use parking_lot::Mutex;
+use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct GroupState {
